@@ -1,7 +1,7 @@
 const width = 860
 const height = 750
 
-const svg = d3.select('#crimeVis')  
+const svg = d3.select('#root').append('svg')  
   .attr('width', width)
   .attr('height', height)
   .append('g')
@@ -17,7 +17,7 @@ const path = d3.geoPath(proj)
 Promise.all([
   d3.json('data/oakland_topo.json'),
   d3.csv('data/oak_crime.csv', d => {
-    const match = d.Location.trim().match(/\(([\d-.]+)°, ([\d-.]+)°\)$/) // e.g. [ "(37.834632°, -122.195153°)", "37.834632", "-122.195153" ]
+    const match = d.Location.trim().match(/\(([\d-.]+)°?, ([\d-.]+)°?\)$/) // e.g. [ "(37.834632°, -122.195153°)", "37.834632", "-122.195153" ]
     // console.log(`match: ${match}`)
     if (!match) {
       return d
@@ -34,10 +34,13 @@ Promise.all([
   .catch(e => console.error(e))
 
 function go ([us, data]) {
-  console.log(data[1]) //test a row
+  // console.log(data[1])
+  const geocodedRows = data.filter(d => ('latitude' in d) && ('longitude' in d))
+  console.log(geocodedRows) 
   const features = topojson.feature(us, us.objects.oakland)
   svg.append('path')
     .attr('d', path(features))
+  
 }
 
 
