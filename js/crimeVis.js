@@ -36,10 +36,36 @@ Promise.all([
 function go ([us, data]) {
   // console.log(data[1])
   const geocodedRows = data.filter(d => ('latitude' in d) && ('longitude' in d))
-  console.log(geocodedRows) 
+  // console.log(geocodedRows) 
+  
   const features = topojson.feature(us, us.objects.oakland)
   svg.append('path')
     .attr('d', path(features))
+
+  const points = data.map(d => {
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [d.longitude, d.latitude]
+      },
+      properties: d
+    }
+  })
+  
+  const crimeTypes = [...new Set(points.map(d => d.properties.CRIMETYPE))]
+  const color = crimeType => (
+    `hsl(${crimeTypes.indexOf(crimeType) / crimeTypes.length * 360}, 100%, 70%)`
+  );
+
+  svg.selectAll('circle')
+    .data(points)
+  .enter().append('circle')
+    .attr('cx', d => path.centroid(d)[0])
+    .attr('cy', d => path.centroid(d)[1])
+    .attr('r', 2.5)
+    .style('fill', d => color(d.properties.CRIMETYPE))
+    .style('opacity', 0.5)
   
 }
 
