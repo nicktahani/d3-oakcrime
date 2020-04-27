@@ -14,6 +14,8 @@ const proj = d3.geoAlbers()
   
 const path = d3.geoPath(proj)
 
+const tooltip = d3.select('body').append('div')
+
 Promise.all([
   d3.json('data/oakland_topo.json'),
   d3.csv('data/oak_crime.csv', d => {
@@ -66,8 +68,20 @@ function go ([us, data]) {
     .attr('r', 2.5)
     .style('fill', d => color(d.properties.CRIMETYPE))
     .style('opacity', 0.5)
+    .on('mouseover', mouseover)
+    .on('mouseout', mouseout)
   
 }
 
+const mouseover = d => {
+  tooltip
+    .style('display', 'inline')
+    .html(`crime type: ${d.properties.CRIMETYPE}`)
+}
+
+const mouseout = () => {
+  tooltip
+    .style('display', 'none')
+}
 
 
